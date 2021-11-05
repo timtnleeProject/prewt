@@ -2,3 +2,5 @@
 dist/
 # module
 node_modules/
+# template
+template/yarn.lock
