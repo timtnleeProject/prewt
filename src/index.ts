@@ -1,28 +1,26 @@
 #!/usr/bin/env node
-const sade = require("sade");
-const rl = require("readline");
-const path = require("path");
-const execa = require("execa");
-const fs = require("fs-extra");
-const inquirer = require("inquirer");
-
-const ignorePatterns = ["//"];
-console.log("ya");
+import sade from "sade";
+import chalk from "chalk";
+import path from "path";
+import execa from "execa";
+import fs from "fs-extra";
+import inquirer from "inquirer";
+import ora from "ora";
 
 const version = "1.0.0";
-const prog = sade("tool");
+const prog = sade("prewt");
 prog
   .version(version)
   .command("create <pkg_name>")
-  .describe("hahahahha")
+  .describe("Create project based on prewt structure.")
   .action(async (pkg_name, opt) => {
     await execa.commandSync(`mkdir ${pkg_name}`);
     initPkg(pkg_name);
   });
 
-const initPkg = (pkg_name) => {
-  let pkgMgmt;
-  let appDir = `./${pkg_name}`;
+const initPkg = (appName: string) => {
+  let pkgMgmt: string;
+  let appDir = `./${appName}`;
   inquirer
     .prompt({
       type: "list",
@@ -32,7 +30,10 @@ const initPkg = (pkg_name) => {
     })
     .then((answers) => {
       pkgMgmt = answers.pkgMgmt;
-      // Use user feedback for... whatever!!
+      /**
+       * Copy the whole "template" folder into target dir
+       * exclude node_modules, yarn.lock
+       **/
       return fs.copy(path.resolve(__dirname, "./template"), appDir, {
         filter: (pathname) => {
           if (pathname.match(/(node_modules|yarn.lock)/)) return false;
@@ -41,25 +42,43 @@ const initPkg = (pkg_name) => {
       });
     })
     .then(() => {
-      console.log("installing...");
+      // set package.json name
+      return fs.writeJSON(path.resolve(appDir, "./package.json"), {
+        name: appName,
+        author: "",
+      });
+    })
+    .then(() => {
+      const spinner = ora("Installing").start();
+      spinner.color = "yellow";
+      /**
+       * move process to target dir
+       **/
       process.chdir(appDir);
+
+      /**
+       * run "npm i" or "yarn"
+       **/
       const command = pkgMgmt === "npm" ? "npm i" : "yarn";
       const { stdout } = execa.command(command);
 
-      return new Promise((resolve, reject) => {
-        stdout.on("data", (data) => {
+      return new Promise<void>((resolve, reject) => {
+        stdout?.on("data", (data) => {
           console.log(data.toString());
         });
-        stdout.on("end", () => {
+        stdout?.on("end", () => {
+          spinner.stop();
           resolve();
         });
-        stdout.on("error", (e) => {
+        stdout?.on("error", (e) => {
           reject(e);
         });
       });
     })
     .then(() => {
-      console.log("done");
+      console.log("DONE, to start development, run:");
+      console.log(chalk.blue(`cd ./${appName}`));
+      console.log(chalk.blue(`${pkgMgmt} start`));
     })
     .catch((error) => {
       if (error.isTtyError) {
