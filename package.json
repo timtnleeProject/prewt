@@ -7,6 +7,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "start": "tsc --watch",
     "build": "tsc"
   },
   "dependencies": {
