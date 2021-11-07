@@ -1,8 +1,17 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, useMemo } from "react";
 
-const Button = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
-  const { children, ...rest } = props;
-  return <button {...rest}>{children}</button>;
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  op?: number;
+}
+const Button = (props: ButtonProps) => {
+  const { children, op, ...rest } = props;
+  // TODO: check this should have lint error
+  const num = useMemo(() => (op ? 0 : (op as number) + 2), []);
+  return (
+    <button {...rest}>
+      {children} {num}
+    </button>
+  );
 };
 
 export default Button;

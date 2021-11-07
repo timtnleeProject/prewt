@@ -4,11 +4,11 @@ module.exports = {
     node: true,
     es2021: true,
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
-  ],
+  settings: {
+    react: {
+      version: "detect",
+    },
+  },
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaFeatures: {
@@ -17,7 +17,13 @@ module.exports = {
     ecmaVersion: 13,
     sourceType: "module",
   },
-  plugins: ["react", "@typescript-eslint"],
+  extends: [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
+  ],
+  plugins: ["react", "react-hooks", "@typescript-eslint"],
   rules: {
     "@typescript-eslint/no-var-requires": 0,
     "react/react-in-jsx-scope": 0,
