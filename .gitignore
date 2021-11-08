@@ -5,3 +5,4 @@ dist/
 node_modules/
 # template
 template/yarn.lock
+yarn.lock

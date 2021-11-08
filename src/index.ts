@@ -4,10 +4,11 @@ import chalk from "chalk";
 import path from "path";
 import execa from "execa";
 import fs from "fs-extra";
-import inquirer from "inquirer";
+import prompts from "prompts";
 import ora from "ora";
+import prettier from "prettier";
 import { fileURLToPath } from "url";
-import mergeJsonFile from "./helper/mergeJsonFile";
+import mergeJsonFile from "./helper/mergeJsonFile.js";
 
 // define __dirname for esm
 const __filename = fileURLToPath(import.meta.url);
@@ -35,13 +36,15 @@ const initPkg = (appName: string) => {
     return;
   }
   // start
-  inquirer
-    .prompt({
-      type: "list",
-      name: "pkgMgmt",
-      message: "Npm or Yarn?",
-      choices: ["npm", "yarn"],
-    })
+  prompts({
+    type: "select",
+    name: "pkgMgmt",
+    message: "Npm or Yarn?",
+    choices: [
+      { title: "npm", value: "npm" },
+      { title: "yarn", value: "yarn" },
+    ],
+  })
     .then((answers: { pkgMgmt: string }) => {
       pkgMgmt = answers.pkgMgmt;
       return execa.commandSync(`mkdir ${appName}`);
@@ -59,10 +62,16 @@ const initPkg = (appName: string) => {
       });
     })
     .then(() => {
-      // set package.json name
+      // set package.json fileds
       const appDirJson = path.resolve(appDir, "./package.json");
-      const templateDirJson = path.resolve(__dirname, "./template/package.json");
-      return fs.writeJSON(appDirJson, mergeJsonFile(templateDirJson, appDirJson));
+      const templateDirJson = path.resolve(templateDir, "./package.json");
+      const str = JSON.stringify(
+        mergeJsonFile(templateDirJson, {
+          name: appName,
+          author: "",
+        })
+      );
+      return fs.writeFile(appDirJson, prettier.format(str, { parser: "json" }));
     })
     .then(() => {
       const spinner = ora("Installing...").start();
