@@ -7,6 +7,7 @@ import fs from "fs-extra";
 import inquirer from "inquirer";
 import ora from "ora";
 import { fileURLToPath } from "url";
+import mergeJsonFile from "./helper/mergeJsonFile";
 
 // define __dirname for esm
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +42,7 @@ const initPkg = (appName: string) => {
       message: "Npm or Yarn?",
       choices: ["npm", "yarn"],
     })
-    .then((answers) => {
+    .then((answers: { pkgMgmt: string }) => {
       pkgMgmt = answers.pkgMgmt;
       return execa.commandSync(`mkdir ${appName}`);
     })
@@ -59,10 +60,9 @@ const initPkg = (appName: string) => {
     })
     .then(() => {
       // set package.json name
-      // return fs.writeJSON(path.resolve(appDir, "./package.json"), {
-      //   name: appName,
-      //   author: "",
-      // });
+      const appDirJson = path.resolve(appDir, "./package.json");
+      const templateDirJson = path.resolve(__dirname, "./template/package.json");
+      return fs.writeJSON(appDirJson, mergeJsonFile(templateDirJson, appDirJson));
     })
     .then(() => {
       const spinner = ora("Installing...").start();
@@ -86,7 +86,7 @@ const initPkg = (appName: string) => {
       console.log(chalk.blueBright(`cd ./${appName}`));
       console.log(chalk.blueBright(`${pkgMgmt} start`));
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       console.error(error);
     });
 };
