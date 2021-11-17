@@ -3,6 +3,7 @@ import sade from "sade";
 import path from "path";
 import { fileURLToPath } from "url";
 import createApp from "./command/create.js";
+import add from "./command/add.js";
 
 // define __dirname for esm
 const __filename = fileURLToPath(import.meta.url);
@@ -20,8 +21,8 @@ prog
 prog
   .command("add <pkg_name>")
   .describe("Add spoort package and setup related configuration.")
-  .action(async (pkg_name, opt) => {
-    console.log(pkg_name);
+  .action((pkg_name, opt) => {
+    add(pkg_name);
   });
 
 prog.parse(process.argv);

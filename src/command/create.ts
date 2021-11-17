@@ -5,8 +5,9 @@ import fs from "fs-extra";
 import prompts from "prompts";
 import prettier from "prettier";
 import ora from "ora";
-import mergeJsonFile from "../helper/mergeJsonFile.js";
 import { templateDir } from "../paths.js";
+import mergeJsonFile from "../helper/mergeJsonFile.js";
+import { log, LogType } from "../helper/log.js";
 
 const createApp = (appName: string) => {
   let pkgMgmt: string;
@@ -74,7 +75,8 @@ const createApp = (appName: string) => {
       });
     })
     .then(() => {
-      console.log("DONE, to start development, run:");
+      log(LogType.Success, "init prewt project");
+      console.log(chalk.cyanBright("to start the project:"));
       console.log(chalk.blueBright(`cd ./${appName}`));
       console.log(chalk.blueBright(`${pkgMgmt} start`));
     })
